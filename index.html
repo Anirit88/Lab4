@@ -35,7 +35,6 @@
             background: rgba(255, 255, 255, 0.8);
             border-style: solid;
             border-width: 1px;
-            border-color: rgba(0, 0, 0, 0.2);
             margin-left: 20px;
             font-family: Arial, sans-serif;
             overflow: auto;
@@ -51,7 +50,6 @@
 
         #legend {
             padding: 10px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             line-height: 18px;
             height: 210px;
             margin-bottom: 40px;
@@ -65,6 +63,7 @@
             height: 10px;
             margin-right: 5px;
         }
+
         .mapboxgl-canvas-container.mapboxgl-interactive,
         .mapboxgl-ctrl-group button.mapboxgl-ctrl-compass {
             cursor: unset;
@@ -85,12 +84,11 @@
         mapboxgl.accessToken = 'pk.eyJ1IjoiYW5iYW5zYWwiLCJhIjoiY2tiMHI5Y2R0MGNjczJwbzJkZDVrdzJ1eiJ9.E-X-0DFCRFOGJbHRgTEcIw';
 
         const map = new mapboxgl.Map({
-                container: 'map', // container ID
-                style: 'mapbox://styles/mapbox/light-v10', // style URL
-                zoom: 6, // starting zoom
-                center: [-120,47] // starting center
-            }
-        );
+            container: 'map', // container ID
+            style: 'mapbox://styles/mapbox/light-v10', // style URL
+            zoom: 6, // starting zoom
+            center: [-120,47] // starting center
+        });
 
         async function geojsonFetch() {
             let response = await fetch('assets/covid.geojson');
@@ -101,14 +99,10 @@
                 const cases = Number(feature.properties.casePer10k);
                 const deaths = Number(feature.properties.deathPer10k);
 
-                // Debug logging to check the values of 'cases' and 'deaths'
-                console.log('Cases:', cases);
-                console.log('Deaths:', deaths);
-
                 // Check for NaN values and potential division by zero errors
                 if (!isNaN(cases) && !isNaN(deaths) && cases !== 0) {
                     const deathPerCase = (deaths / cases)*100;
-                    feature.properties.deathPerCase = deathPerCase.toFixed(3);
+                    feature.properties.deathPerCase = Number(deathPerCase.toFixed(3));
                 } else {
                     feature.properties.deathPerCase = 0; // Set to 0 if there are NaN values or division by zero errors
                 }
@@ -126,24 +120,25 @@
                     'source': 'covid_data',
                     'paint': {
                         'fill-color': [
-                            'step',
-                            ['get', 'deathPerCase'], // Use the 'deathPerCase' property for deaths/cases ratio
-                            '#FFEDA0',   // stop_output_0
-                            0.1,         // stop_input_0 (modify as needed)
-                            '#FED976',   // stop_output_1
-                            0.2,         // stop_input_1 (modify as needed)
-                            '#FEB24C',   // stop_output_2
-                            0.5,         // stop_input_2 (modify as needed)
-                            '#FD8D3C',   // stop_output_3
-                            1,           // stop_input_3 (modify as needed)
-                            '#FC4E2A',   // stop_output_4
-                            2,           // stop_input_4 (modify as needed)
-                            '#E31A1C',   // stop_output_5
-                            5,           // stop_input_5 (modify as needed)
-                            '#BD0026',   // stop_output_6
-                            10,          // stop_input_6 (modify as needed)
-                            '#800026'    // stop_output_7
+                            'step',      // use step expression to provide fill color based on values
+                            ['get', 'deathPerCase'],  // get the deathPerCase attribute from the data
+                            '#FFEDA0',   // use color #FFEDA0
+                            0,           // if deathPerCase < 0.1
+                            '#FED976',   // use color #FED976
+                            0.1,         // if 0.1 <= deathPerCase < 0.2
+                            '#FEB24C',   // use color #FEB24C
+                            0.2,         // if 0.2 <= deathPerCase < 0.5
+                            '#FD8D3C',   // use color #FD8D3C
+                            0.5,         // if 0.5 <= deathPerCase < 1
+                            '#FC4E2A',   // use color #FC4E2A
+                            1,           // if 1 <= deathPerCase < 2
+                            '#E31A1C',   // use color #E31A1C
+                            2,           // if 2 <= deathPerCase < 5
+                            '#BD0026',   // use color #BD0026
+                            5,           // if 5 <= deathPerCase < 10
+                            "#800026"    // use color #800026 if deathPerCase >= 10
                         ],
+
                         'fill-outline-color': '#BBBBBB',
                         'fill-opacity': 0.7,
                     }
@@ -160,19 +155,19 @@
                     '10 and more'
                 ];
                 const colors = [
-                    '#FFEDA070',
-                    '#FED97670',
-                    '#FEB24C70',
-                    '#FD8D3C70',
-                    '#FC4E2A70',
-                    '#E31A1C70',
-                    '#BD002670',
-                    '#80002670'
+                    '#FFEDA0',
+                    '#FED976',
+                    '#FEB24C',
+                    '#FD8D3C',
+                    '#FC4E2A',
+                    '#E31A1C',
+                    '#BD0026',
+                    '#800026'
                 ];
 
                 // create legend
                 const legend = document.getElementById('legend');
-                legend.innerHTML = "<b>COVID death percentage<br>(%)</b><br><br>";
+                legend.innerHTML = "<b>COVID death percentage per 10k<br>(%)</b><br><br>";
 
                 layers.forEach((layer, i) => {
                     const color = colors[i];
@@ -187,6 +182,7 @@
                     item.appendChild(value);
                     legend.appendChild(item);
                 });
+
             });
 
             map.on('mousemove', ({point}) => {
@@ -194,7 +190,7 @@
                     layers: ['covid_data_layer']
                 });
                 document.getElementById('text-description').innerHTML = state.length ?
-                    `<h3>${state[0].properties.name}<p><strong><em>${state[0].properties.deathPerCase}</strong> Percentage of Deaths </em></p></h3>` :
+                    `<h3>${state[0].properties.name}<p><strong><em>${state[0].properties.deathPerCase}</strong> % of Deaths </em></p></h3>` :
                     `<p>Hover over a state!</p>`;
             });
         }
