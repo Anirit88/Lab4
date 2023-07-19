@@ -123,20 +123,20 @@
                             'step',      // use step expression to provide fill color based on values
                             ['get', 'deathPerCase'],  // get the deathPerCase attribute from the data
                             '#FFEDA0',   // use color #FFEDA0
-                            0,           // if deathPerCase < 0.1
+                            0.5,           // if deathPerCase < 0.5
                             '#FED976',   // use color #FED976
-                            0.1,         // if 0.1 <= deathPerCase < 0.2
+                            1,         // if deathPerCase < 1
                             '#FEB24C',   // use color #FEB24C
-                            0.2,         // if 0.2 <= deathPerCase < 0.5
+                            1.5,         // if deathPerCase < 1.5
                             '#FD8D3C',   // use color #FD8D3C
-                            0.5,         // if 0.5 <= deathPerCase < 1
+                            2,         // if deathPerCase < 2
                             '#FC4E2A',   // use color #FC4E2A
-                            1,           // if 1 <= deathPerCase < 2
+                            2.5,           // if deathPerCase < 2.5
                             '#E31A1C',   // use color #E31A1C
-                            2,           // if 2 <= deathPerCase < 5
+                            3,           // if deathPerCase < 3
                             '#BD0026',   // use color #BD0026
-                            5,           // if 5 <= deathPerCase < 10
-                            "#800026"    // use color #800026 if deathPerCase >= 10
+                            5,           // if deathPerCase < 5
+                            "#800026"    // use color #800026 if deathPerCase >= 5
                         ],
 
                         'fill-outline-color': '#BBBBBB',
@@ -145,14 +145,14 @@
                 });
 
                 const layers = [
-                    '0-0.1',
-                    '0.1-0.2',
-                    '0.2-0.5',
-                    '0.5-1',
-                    '1-2',
-                    '2-5',
-                    '5-10',
-                    '10 and more'
+                    '0-0.5',
+                    '0.5-1.0',
+                    '1.0-1.5',
+                    '0.5-2',
+                    '2-2.5',
+                    '2.5-3',
+                    '3-5',
+                    '5 and more'
                 ];
                 const colors = [
                     '#FFEDA0',
