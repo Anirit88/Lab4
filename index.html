@@ -102,7 +102,7 @@
                 // Check for NaN values and potential division by zero errors
                 if (!isNaN(cases) && !isNaN(deaths) && cases !== 0) {
                     const deathPerCase = (deaths / cases)*100;
-                    feature.properties.deathPerCase = Number(deathPerCase.toFixed(3));
+                    feature.properties.deathPerCase = (deathPerCase.toFixed(3));
                 } else {
                     feature.properties.deathPerCase = 0; // Set to 0 if there are NaN values or division by zero errors
                 }
